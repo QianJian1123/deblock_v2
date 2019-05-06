@@ -1,0 +1,7 @@
+src:
+	CNN.py: networks
+	label.py: dataset loading class
+	train.py: training codes
+results:
+	netname_psnr_record : psnr for each network
+	record: final loss&psnr record
