@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import openpyxl as excel
 
 from label import Dataset
-from CNN import DenseCNN as ConvNet
+from CNN import DsCNN as ConvNet
 
 parser = argparse.ArgumentParser(description='PyTorch DnCNN')
 parser.add_argument('-n','--name', default='None', type=str, help='the name of the model')
@@ -38,6 +38,7 @@ def main():
     train_name=     info['train_dataset']
     learning_rate=  float(learning_rate)
     psnr_max=       info['psnr_max']
+    unitnum=        info['unitnum']
     print('load conf successfully')
     configfile.close()
 
@@ -58,7 +59,7 @@ def main():
                                                 shuffle=False)
     #create or load model
     
-    model = ConvNet(depth)
+    model = ConvNet(depth,unitnum)
     if os.path.exists(pre_loading):
         model.load_state_dict(torch.load(pre_loading))
         print('load model successfully')

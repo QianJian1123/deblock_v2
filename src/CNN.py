@@ -103,3 +103,42 @@ class DenseCNN(nn.Module):
                 init.constant_(m.weight, 1)
                 init.constant_(m.bias, 0)
         print('init weight successfully')
+
+class DsCNN(nn.Module):
+    def __init__(self, depth=20,unitnum=6,n_channels=64, image_channels=1, kernel_size=3):
+        super(DsCNN, self).__init__()
+        kernel_size = 3
+        padding = 1
+        self.unitnum=unitnum
+        self.layerlist=nn.ModuleList()
+        for layeridx in range(unitnum):
+            layers = []
+            layers.append(nn.Conv2d(in_channels=image_channels+layeridx, out_channels=n_channels, kernel_size=kernel_size, padding=padding, bias=True))
+            layers.append(nn.ReLU(inplace=True))
+            for _ in range(depth-2):
+                layers.append(nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=kernel_size, padding=padding, bias=True))
+                layers.append(nn.BatchNorm2d(n_channels, eps=0.0001, momentum = 0.95))
+                layers.append(nn.ReLU(inplace=True))
+            layers.append(nn.Conv2d(in_channels=n_channels, out_channels=image_channels, kernel_size=kernel_size, padding=padding, bias=True))
+            dncnn=nn.Sequential(*layers)
+            self.layerlist.append(dncnn) 
+        self._initialize_weights()
+
+    def forward(self, x):
+        outlist=[]
+        outlist.append(x)
+        for layeridx in range(self.unitnum):
+            out=self.layerlist[layeridx](torch.cat(outlist,1))
+            outlist.append(out)
+        return outlist[self.unitnum]+x
+    def _initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                init.orthogonal_(m.weight)
+                
+                if m.bias is not None:
+                    init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                init.constant_(m.weight, 1)
+                init.constant_(m.bias, 0)
+        print('init weight successfully')
